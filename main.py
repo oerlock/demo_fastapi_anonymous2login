@@ -1,7 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from starlette.requests import Request
 
-from dependencies import get_current_user
 from middleware import UserMiddleware
 from schema.user import User
 from utils import decode_token, create_token
@@ -11,18 +10,17 @@ app.add_middleware(UserMiddleware)
 
 
 @app.get("/profile")
-async def read_profile(request: Request):
-    user: User = request.state.user
-    return {"user": user.dict()}
+async def read_profile(request: Request) -> User:
+    return request.state.user
 
 
 @app.get("/only-registered")
-async def only_registered(request: Request):
+async def only_registered(request: Request) -> User:
     user: User = request.state.user
     if user.role == "anonymous":
         from fastapi import HTTPException
         raise HTTPException(status_code=401, detail="Login required")
-    return {"user": user.dict()}
+    return user
 
 
 @app.post("/login")

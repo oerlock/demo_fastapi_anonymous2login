@@ -1,6 +1,5 @@
-from fastapi import FastAPI, Request, Response
+from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
 
 from schema.user import User
 from utils import decode_token, create_anonymous_token, is_token_expiring, create_token
@@ -9,7 +8,6 @@ from utils import decode_token, create_anonymous_token, is_token_expiring, creat
 class UserMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         auth_header = request.headers.get("Authorization")
-        user = None
         new_token = None
 
         if auth_header and auth_header.startswith("Bearer "):

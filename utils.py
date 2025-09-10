@@ -1,5 +1,6 @@
+import datetime
+
 import jwt, uuid
-from datetime import datetime, timedelta
 
 SECRET_KEY = "your-secret"
 ALGORITHM = "HS256"
@@ -7,9 +8,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 ANON_RENEW_THRESHOLD_MINUTES = 30  # 剩余小于30分钟就续期
 
 
-def create_token(data: dict, expires_delta: timedelta | None = None):
+def create_token(data: dict, expires_delta: datetime.timedelta | None = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.datetime.now(datetime.UTC) + (
+                expires_delta or datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
@@ -29,5 +31,5 @@ def is_token_expiring(payload: dict, threshold_minutes=ANON_RENEW_THRESHOLD_MINU
     exp = payload.get("exp")
     if not exp:
         return True
-    remaining = datetime.utcfromtimestamp(exp) - datetime.utcnow()
-    return remaining < timedelta(minutes=threshold_minutes)
+    remaining = datetime.datetime.fromtimestamp(exp, datetime.UTC) - datetime.datetime.now(datetime.UTC)
+    return remaining < datetime.timedelta(minutes=threshold_minutes)
